@@ -8,6 +8,7 @@
     :copyright: (c) 2018-2019 by Yannick Boetzel.
     :license: GPLv3, see LICENSE for more details.
 """
+# Modified by Dentsys (November 2025): Renamed console script entry point.
 
 import os
 import re
@@ -25,15 +26,15 @@ with open(os.path.join(DIRNAME, 'pyznap/__init__.py'), 'r') as file:
 setup(
     name='pyznap',
     version=version,
-    description='ZFS snapshot tool written in Python',
+    description='Dentsys standardized ZFS snapshot tool',
     long_description=readme,
     long_description_content_type="text/markdown",
     keywords='zfs snapshot backup',
-    url='https://github.com/yboetz/pyznap',
-    author='Yannick Boetzel',
-    author_email='github@boetzel.ch',
+    url='https://github.com/cqdence/dentsys',
+    author='Dentsys',
+    author_email='support@gpconnectivity.com',
     license='GPLv3',
-    packages=['pyznap'],
+    packages=['dentsys'],
     include_package_data=True,
     python_requires='>=3.5',
     extras_require={
@@ -59,7 +60,7 @@ setup(
         'Topic :: System :: Filesystems',
     ],
     entry_points = {
-        'console_scripts': ['pyznap=pyznap.main:main'],
+        'console_scripts': ['dentsys=pyznap.main:main'],
     },
     zip_safe=False
 )

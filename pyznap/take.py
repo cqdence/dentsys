@@ -7,6 +7,7 @@
     :copyright: (c) 2018-2019 by Yannick Boetzel.
     :license: GPLv3, see LICENSE for more details.
 """
+# Modified by Dentsys (November 2025): Updated naming convention to 'dentsys'.
 
 import logging
 from datetime import datetime, timedelta
@@ -31,7 +32,7 @@ def take_snap(filesystem, _type):
     logger = logging.getLogger(__name__)
     now = datetime.now
 
-    snapname = lambda _type: 'pyznap_{:s}_{:s}'.format(now().strftime('%Y-%m-%d_%H:%M:%S'), _type)
+    snapname = lambda _type: 'dentsys_{:s}_{:s}'.format(now().strftime('%Y-%m-%d_%H:%M:%S'), _type)
 
     logger.info('Taking snapshot {}@{:s}...'.format(filesystem, snapname(_type)))
     try:
@@ -72,7 +73,7 @@ def take_filesystem(filesystem, conf):
     # categorize snapshots
     for snap in fs_snapshots:
         # Ignore snapshots not taken with pyznap or sanoid
-        if not snap.name.split('@')[1].startswith(('pyznap', 'autosnap')):
+        if not snap.name.split('@')[1].startswith(('dentsys', 'pyznap', 'autosnap')):
             continue
         try:
             _date, _time, snap_type = snap.name.split('_')[-3:]

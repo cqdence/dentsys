@@ -7,6 +7,7 @@
     :copyright: (c) 2015-2019 by Stephen Drake, Yannick Boetzel.
     :license: GPLv3, see LICENSE for more details.
 """
+# Modified by Dentsys (November 2025): Hardcoded system paths for Proxmox/Debian stability.
 
 
 import sys
@@ -16,25 +17,19 @@ from shlex import quote
 from .process import check_output, DatasetNotFoundError, DatasetBusyError
 from .utils import exists
 
+# --- DENTSYS CONFIG ---
+ZFS_CMD = '/usr/sbin/zfs'
 
 SHELL = ['sh', '-c']
 
-# Use mbuffer if installed on the system
-if exists('mbuffer'):
-    MBUFFER = lambda mem: ['mbuffer', '-q', '-s', '128K', '-m', '{:d}M'.format(mem)]
-else:
-    MBUFFER = None
-
-# Use pv if installed on the system
-if exists('pv'):
-    PV = lambda size: ['pv', '-f', '-w', '100', '-s', str(size)]
-else:
-    PV = None
+# Hardcoded paths for Dentsys servers
+MBUFFER = lambda mem: ['/usr/bin/mbuffer', '-q', '-s', '128K', '-m', '{:d}M'.format(mem)]
+PV = lambda size: ['/usr/bin/pv', '-f', '-w', '100', '-s', str(size)]
 
 
 def find(path=None, ssh=None, max_depth=None, types=[]):
     """Lists filesystems and snapshots for a given path"""
-    cmd = ['zfs', 'list']
+    cmd = [ZFS_CMD, 'list']
 
     cmd.append('-H')
 
@@ -63,7 +58,7 @@ def find(path=None, ssh=None, max_depth=None, types=[]):
 
 def findprops(path=None, ssh=None, max_depth=None, props=['all'], sources=[], types=[]):
     """Lists all properties of a given filesystem"""
-    cmd = ['zfs', 'get']
+    cmd = [ZFS_CMD, 'get']
 
     cmd.append('-H')
     cmd.append('-p')
@@ -120,7 +115,7 @@ def roots(ssh=None):
 
 # note: force means create missing parent filesystems
 def create(name, ssh=None, type='filesystem', props={}, force=False):
-    cmd = ['zfs', 'create']
+    cmd = [ZFS_CMD, 'create']
 
     if type == 'volume':
         raise NotImplementedError()
@@ -166,7 +161,7 @@ def receive(name, stdin, ssh=None, ssh_source=None, append_name=False, append_pa
         decompress = None
 
     # construct zfs receive command
-    cmd = ['zfs', 'receive']
+    cmd = [ZFS_CMD, 'receive']
 
     # cmd.append('-v')
 
@@ -233,7 +228,7 @@ class ZFSDataset(object):
     # TODO: split force to allow -f, -r and -R to be specified individually
     # TODO: remove or ignore defer option for non-snapshot datasets
     def destroy(self, defer=False, force=False):
-        cmd = ['zfs', 'destroy']
+        cmd = [ZFS_CMD, 'destroy']
 
         cmd.append('-v')
 
@@ -249,7 +244,7 @@ class ZFSDataset(object):
         check_output(cmd, ssh=self.ssh)
 
     def snapshot(self, snapname, recursive=False, props={}):
-        cmd = ['zfs', 'snapshot']
+        cmd = [ZFS_CMD, 'snapshot']
 
         if recursive:
             cmd.append('-r')
@@ -266,7 +261,7 @@ class ZFSDataset(object):
 
     def receive_abort(self):
         """Aborts the resumeable receive state"""
-        cmd = ['zfs', 'receive']
+        cmd = [ZFS_CMD, 'receive']
 
         cmd.append('-A')
         cmd.append(self.name)
@@ -295,7 +290,7 @@ class ZFSDataset(object):
         return default if value == '-' else value
 
     def setprop(self, prop, value):
-        cmd = ['zfs', 'set']
+        cmd = [ZFS_CMD, 'set']
 
         cmd.append(prop + '=' + str(value))
         cmd.append(self.name)
@@ -303,7 +298,7 @@ class ZFSDataset(object):
         check_output(cmd, ssh=self.ssh)
 
     def delprop(self, prop, recursive=False):
-        cmd = ['zfs', 'inherit']
+        cmd = [ZFS_CMD, 'inherit']
 
         if recursive:
             cmd.append('-r')
@@ -383,7 +378,7 @@ class ZFSSnapshot(ZFSDataset):
             compress = None
 
         # construct zfs send command
-        cmd = ['zfs', 'send']
+        cmd = [ZFS_CMD, 'send']
 
         # cmd.append('-v')
         # cmd.append('-P')
@@ -441,7 +436,7 @@ class ZFSSnapshot(ZFSDataset):
         else:
             self.stream_cache[cache_key] = 0
 
-        cmd = ['zfs', 'send', '-nvP']
+        cmd = [ZFS_CMD, 'send', '-nvP']
 
         if raw:
             cmd.append('-w')
@@ -470,7 +465,7 @@ class ZFSSnapshot(ZFSDataset):
             return 0
 
     def hold(self, tag, recursive=False):
-        cmd = ['zfs', 'hold']
+        cmd = [ZFS_CMD, 'hold']
 
         if recursive:
             cmd.append('-r')
@@ -481,7 +476,7 @@ class ZFSSnapshot(ZFSDataset):
         check_output(cmd, ssh=self.ssh)
 
     def holds(self):
-        cmd = ['zfs', 'holds']
+        cmd = [ZFS_CMD, 'holds']
 
         cmd.append('-H')
 
@@ -493,7 +488,7 @@ class ZFSSnapshot(ZFSDataset):
         return [hold[1] for hold in out]
 
     def release(self, tag, recursive=False):
-        cmd = ['zfs', 'release']
+        cmd = [ZFS_CMD, 'release']
 
         if recursive:
             cmd.append('-r')

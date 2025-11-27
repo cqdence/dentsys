@@ -7,6 +7,7 @@
     :copyright: (c) 2018-2019 by Yannick Boetzel.
     :license: GPLv3, see LICENSE for more details.
 """
+# Modified by Dentsys (November 2025): Hardcoded SSH and compression paths.
 
 import os
 import logging
@@ -78,7 +79,7 @@ class SSH:
             self.logger.error('{} is not a valid ssh key file...'.format(self.key))
             raise FileNotFoundError(self.key)
 
-        self.cmd = ['ssh', '-i', self.key, '-o', 'ControlMaster=auto', '-o', 'ControlPersist=1m',
+        self.cmd = ['/usr/bin/ssh', '-i', self.key, '-o', 'ControlMaster=auto', '-o', 'ControlPersist=1m',
                     '-o', 'ControlPath={:s}'.format(self.socket), '-p', str(self.port),
                     '-o', 'ServerAliveInterval=30', '{:s}@{:s}'.format(self.user, self.host)]
 
