@@ -24,7 +24,7 @@ with open(os.path.join(DIRNAME, 'pyznap/__init__.py'), 'r') as file:
     version = re.search(r'__version__ = \'(.*?)\'', file.read()).group(1)
 
 setup(
-    name='pyznap',
+    name='dentsys',
     version=version,
     description='Dentsys standardized ZFS snapshot tool',
     long_description=readme,
@@ -34,7 +34,7 @@ setup(
     author='Dentsys',
     author_email='support@gpconnectivity.com',
     license='GPLv3',
-    packages=['dentsys'],
+    packages=['pyznap'],
     include_package_data=True,
     python_requires='>=3.5',
     extras_require={
