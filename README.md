@@ -31,7 +31,7 @@ Configuration is stored in `/etc/dentsys/dentsys.conf`.
 For a fresh server, run this command as root. This script handles dependencies (pipx, lz4, zstd), installs the software, auto-detects the ZFS pool name (e.g., `sas5`), writes the config, and sets up Cron.
 
 ```bash
-curl -sL [https://raw.githubusercontent.com/cqdence/dentsys/master/install.sh] | bash
+curl -sL https://raw.githubusercontent.com/cqdence/dentsys/master/install.sh | bash
 ```
 
 ### 2. Legacy Migration (Upgrading from Pyznap)
@@ -48,7 +48,7 @@ pipx uninstall pyznap 2>/dev/null || pip3 uninstall -y pyznap
 rm -rf /etc/pyznap
 
 # 4. Run the new installer
-curl -sL [https://raw.githubusercontent.com/cqdence/dentsys/master/install.sh] | bash
+curl -sL https://raw.githubusercontent.com/cqdence/dentsys/master/install.sh | bash
 ```
 
 ---
@@ -175,7 +175,7 @@ If you modify the Python code in this repository:
 2.  **Deploy Update:** Run the install command with `--force` on the client servers.
 
 ```bash
-pipx install --force git+[https://github.com/cqdence/dentsys.git]
+pipx install --force git+https://github.com/cqdence/dentsys.git
 ```
 
 ### Repository Structure
