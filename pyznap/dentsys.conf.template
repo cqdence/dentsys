@@ -1,0 +1,23 @@
+## DENTSYS STANDARD CONFIGURATION
+## ------------------------------------------------------------------
+## Auto-generated for host: {{HOSTNAME}}
+## Target Pool: {{POOL}}
+## ------------------------------------------------------------------
+
+[{{POOL}}/data]
+# --- Retention Policy ---
+frequent = 4       # Keep last 4 (15 mins)
+hourly = 24        # Keep 24 hours
+daily = 7          # Keep 7 days
+weekly = 4         # Keep 4 weeks
+monthly = 6        # Keep 6 months
+yearly = 1         # Keep 1 year
+
+# --- Actions ---
+snap = yes
+clean = yes
+
+# --- Destinations ---
+# dest = ssh:22:root@192.168.1.50:backup/{{HOSTNAME}}
+# dest_keys = /root/.ssh/id_rsa_onsite
+compress = lz4

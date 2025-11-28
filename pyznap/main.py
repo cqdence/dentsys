@@ -22,7 +22,7 @@ from .send import send_config
 
 
 DIRNAME = os.path.dirname(os.path.abspath(__file__))
-CONFIG_DIR = '/etc/pyznap/'
+CONFIG_DIR = '/etc/dentsys/'
 
 def _main():
     """pyznap main function. Parses arguments and calls snap/clean/send functions accordingly.
@@ -94,7 +94,7 @@ def _main():
     logger.info('Starting pyznap...')
 
     if args.command in ('snap', 'send'):
-        config_path = args.config if args.config else os.path.join(CONFIG_DIR, 'pyznap.conf')
+        config_path = args.config if args.config else os.path.join(CONFIG_DIR, 'dentsys.conf')
         config = read_config(config_path)
         if config == None:
             return 1
