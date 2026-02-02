@@ -11,7 +11,15 @@ pipx ensurepath
 
 # 2. Install the Tool (Force update)
 echo ">> Installing Dentsys software..."
-pipx install --force git+https://github.com/cqdence/dentsys.git
+
+# Support for private repositories
+if [ -n "$GITHUB_TOKEN" ]; then
+    # Use token for private repo access
+    pipx install --force git+https://${GITHUB_TOKEN}@github.com/cqdence/dentsys.git
+else
+    # Public repo
+    pipx install --force git+https://github.com/cqdence/dentsys.git
+fi
 
 # 3. Link Binary
 ln -sf /root/.local/bin/dentsys /usr/local/bin/dentsys
@@ -96,10 +104,31 @@ echo ""
 
 # Download Template (FIXED: correct path with pyznap/ prefix)
 echo ">> Downloading configuration template..."
-if ! curl -fsSL https://raw.githubusercontent.com/cqdence/dentsys/master/pyznap/dentsys.conf.template -o /etc/dentsys/dentsys.conf; then
-    echo "❌ ERROR: Failed to download configuration template!"
-    echo "   Check internet connection and GitHub availability."
-    exit 1
+
+# Support for private repositories via GitHub token
+CURL_AUTH=""
+if [ -n "$GITHUB_TOKEN" ]; then
+    echo "   Using GitHub token for authentication..."
+    CURL_AUTH="-H \"Authorization: token ${GITHUB_TOKEN}\""
+fi
+
+# Download with or without authentication
+if [ -n "$CURL_AUTH" ]; then
+    if ! curl -fsSL -H "Authorization: token ${GITHUB_TOKEN}" \
+        https://raw.githubusercontent.com/cqdence/dentsys/master/pyznap/dentsys.conf.template \
+        -o /etc/dentsys/dentsys.conf; then
+        echo "❌ ERROR: Failed to download configuration template!"
+        echo "   Check internet connection, GitHub availability, and token permissions."
+        exit 1
+    fi
+else
+    if ! curl -fsSL https://raw.githubusercontent.com/cqdence/dentsys/master/pyznap/dentsys.conf.template \
+        -o /etc/dentsys/dentsys.conf; then
+        echo "❌ ERROR: Failed to download configuration template!"
+        echo "   Check internet connection and GitHub availability."
+        echo "   For private repos, set GITHUB_TOKEN environment variable."
+        exit 1
+    fi
 fi
 
 # Verify downloaded file is valid INI format
