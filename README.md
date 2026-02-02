@@ -28,11 +28,37 @@ Configuration is stored in `/etc/dentsys/dentsys.conf`.
 ## 🚀 Installation & Deployment
 
 ### 1. New Server Setup (The "One-Liner")
-For a fresh server, run this command as root. This script handles dependencies (pipx, lz4, zstd), installs the software, auto-detects the ZFS pool name (e.g., `sas5`), writes the config, and sets up Cron.
+For a fresh server, run this command as root. This script handles dependencies (pipx, lz4, zstd), installs the software, auto-detects the ZFS pool name (e.g., `sas5`), intelligently finds datasets to snapshot, writes the config, and sets up Cron.
 
 ```bash
 curl -sL https://raw.githubusercontent.com/cqdence/dentsys/master/install.sh | bash
 ```
+
+**What the installer does:**
+1. ✅ Installs dependencies (pipx, git, lz4, zstd, zfsutils-linux)
+2. ✅ Installs Dentsys via pipx from GitHub
+3. ✅ Auto-detects your ZFS pool (excluding boot pools like rpool/bpool)
+4. ✅ **Intelligently detects the best dataset** to snapshot:
+   - Looks for `{pool}/data` (common Proxmox pattern)
+   - Falls back to `{pool}/vm-data` or other common structures
+   - Uses pool root if no subdatasets found
+5. ✅ Creates configuration file at `/etc/dentsys/dentsys.conf`
+6. ✅ Sets up log rotation at `/var/log/dentsys.log` (weekly, 12 weeks retention)
+7. ✅ Installs cron jobs (snapshots every 15 min, backups daily at midnight)
+8. ✅ Validates the installation and shows configuration summary
+
+**Manual dataset selection:**
+If the auto-detection picks the wrong dataset, specify it manually:
+
+```bash
+DENTSYS_DATASET=tank/mydata curl -sL https://raw.githubusercontent.com/cqdence/dentsys/master/install.sh | bash
+```
+
+**Re-running the installer:**
+The installer is idempotent and can be safely re-run. It will:
+- Update dentsys to the latest version
+- Replace cron jobs (removes duplicates automatically)
+- Regenerate configuration (backs up existing to `/etc/dentsys/dentsys.conf.bak` if modified)
 
 ### 2. Legacy Migration (Upgrading from Pyznap)
 If a server is running the old pyznap version, you **must** clean it up to prevent scheduling conflicts.
@@ -164,6 +190,65 @@ dentsys snap --clean --verbose
     ```bash
     ln -s /path/to/actual/zfs /usr/sbin/zfs
     ```
+
+#### 4. "Dataset does not exist" errors
+* **Cause:** The auto-detected dataset was incorrect, or the dataset was deleted after installation.
+* **Fix:** Edit `/etc/dentsys/dentsys.conf` and update the section header to match your actual dataset:
+    ```bash
+    # Change this:
+    [rpool/data]
+
+    # To match your actual dataset:
+    [tank/vm-storage]
+    ```
+* **Verify dataset exists:**
+    ```bash
+    zfs list
+    ```
+
+#### 5. Duplicate cron jobs running
+* **Cause:** Older versions had a bug in cron deduplication.
+* **Fix:** Clean up crontab and re-run installer:
+    ```bash
+    crontab -e
+    # Remove duplicate dentsys lines, save and exit
+    # Then re-run installer to add clean jobs
+    curl -sL https://raw.githubusercontent.com/cqdence/dentsys/master/install.sh | bash
+    ```
+
+#### 6. Installation fails with "Failed to download configuration"
+* **Cause:** Network issues or GitHub is unavailable.
+* **Fix:** Check internet connectivity and retry:
+    ```bash
+    curl -I https://raw.githubusercontent.com/cqdence/dentsys/master/pyznap/dentsys.conf.template
+    ```
+
+### Monitoring and Logs
+
+**View recent activity:**
+```bash
+tail -f /var/log/dentsys.log
+```
+
+**Check snapshot status:**
+```bash
+zfs list -t snapshot | grep dentsys
+```
+
+**View current configuration:**
+```bash
+cat /etc/dentsys/dentsys.conf
+```
+
+**Check cron schedule:**
+```bash
+crontab -l | grep dentsys
+```
+
+**Manually test snapshot creation:**
+```bash
+dentsys snap --verbose
+```
 
 ---
 
