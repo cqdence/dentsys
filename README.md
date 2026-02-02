@@ -54,6 +54,21 @@ If the auto-detection picks the wrong dataset, specify it manually:
 DENTSYS_DATASET=tank/mydata curl -sL https://raw.githubusercontent.com/cqdence/dentsys/master/install.sh | bash
 ```
 
+**Private repository installation:**
+If the repository is private, use a GitHub Personal Access Token:
+
+```bash
+# 1. Create token at: https://github.com/settings/tokens
+#    Required scope: "repo" (full control of private repositories)
+
+# 2. Export token and run installer
+export GITHUB_TOKEN="ghp_your_token_here"
+curl -sL -H "Authorization: token ${GITHUB_TOKEN}" \
+  https://raw.githubusercontent.com/cqdence/dentsys/master/install.sh | bash
+```
+
+The token is only used during installation and is not stored on the server.
+
 **Re-running the installer:**
 The installer is idempotent and can be safely re-run. It will:
 - Update dentsys to the latest version
