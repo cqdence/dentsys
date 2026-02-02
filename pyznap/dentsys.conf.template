@@ -2,22 +2,48 @@
 ## ------------------------------------------------------------------
 ## Auto-generated for host: {{HOSTNAME}}
 ## Target Pool: {{POOL}}
+##
+## This file controls snapshot scheduling and backup destinations.
+## Documentation: https://github.com/cqdence/dentsys
 ## ------------------------------------------------------------------
 
 [{{POOL}}/data]
 # --- Retention Policy ---
-frequent = 4       # Keep last 4 (15 mins)
-hourly = 24        # Keep 24 hours
-daily = 7          # Keep 7 days
-weekly = 4         # Keep 4 weeks
-monthly = 6        # Keep 6 months
-yearly = 1         # Keep 1 year
+# How many snapshots to keep at each interval
+frequent = 4       # Keep last 4 (15-minute intervals, last hour)
+hourly = 24        # Keep 24 hourly snapshots (last day)
+daily = 7          # Keep 7 daily snapshots (last week)
+weekly = 4         # Keep 4 weekly snapshots (last month)
+monthly = 6        # Keep 6 monthly snapshots (last 6 months)
+yearly = 1         # Keep 1 yearly snapshot
 
 # --- Actions ---
-snap = yes
-clean = yes
+snap = yes         # Take snapshots automatically
+clean = yes        # Delete old snapshots per retention policy
 
-# --- Destinations ---
+# --- Remote Backup Destinations (Optional) ---
+# Uncomment and configure to enable off-site replication
+# Format: ssh:PORT:USER@HOST:DESTINATION_DATASET
+#
+# Example for local network backup server:
 # dest = ssh:22:root@192.168.1.50:backup/{{HOSTNAME}}
-# dest_keys = /root/.ssh/id_rsa_onsite
+# dest_keys = /root/.ssh/id_rsa_backup
+#
+# Example for cloud backup:
+# dest = ssh:22:root@backup.example.com:offsite/{{HOSTNAME}}
+# dest_keys = /root/.ssh/id_rsa_offsite
+#
+# Multiple destinations (separate with commas):
+# dest = ssh:22:root@192.168.1.50:backup/{{HOSTNAME}}, ssh:22:root@10.0.0.100:backup2/{{HOSTNAME}}
+# dest_keys = /root/.ssh/id_rsa_backup, /root/.ssh/id_rsa_backup2
+
+# --- Compression ---
+# Compression algorithm for SSH transfers (lz4, gzip, or lzop)
 compress = lz4
+
+# --- Advanced Options (Uncomment to use) ---
+# raw_send = no           # Use raw (encrypted) zfs send
+# resume = no             # Enable resumable send for interrupted transfers
+# dest_auto_create = no   # Automatically create destination dataset if missing
+# retries = 3             # Number of retry attempts on failure
+# retry_interval = 10     # Seconds to wait between retries
